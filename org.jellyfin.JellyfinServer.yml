@@ -1,0 +1,40 @@
+app-id: org.jellyfin.JellyfinServer
+runtime: org.freedesktop.Platform
+runtime-version: '21.08'
+sdk: org.freedesktop.Sdk
+cleanup-commands:
+  - mkdir -p /app/lib/ffmpeg
+add-extensions:
+  org.freedesktop.Platform.ffmpeg-full:
+    directory: lib/ffmpeg
+    version: "21.08"
+    add-ld-path: .
+  org.freedesktop.Platform.VAAPI.Intel:
+    no-autodownload: true
+  org.freedesktop.Platform.GL.default:
+    no-autodownload: true
+command: jellyfin.sh
+finish-args:
+  - --share=network
+  - --device=dri
+  - --filesystem=xdg-music
+  - --filesystem=xdg-pictures
+  - --filesystem=xdg-videos
+modules:
+  - name: org.jellyfin.JellyfinServer
+    buildsystem: simple
+    build-commands:
+      - cp -r jellyfin_10.7.7 ${FLATPAK_DEST}/jellyfin
+    sources:
+      - type: archive
+        url: https://repo.jellyfin.org/releases/server/linux/stable/combined/jellyfin_10.7.7_amd64.tar.gz
+        sha256: ef25e19edced1538554f7e7c2e55f2d6a4ff2eac296cfc659cefcdb5116bb2c7
+        only-arches:
+          - x86_64
+  - name: jellyfin
+    buildsystem: simple
+    build-commands:
+      - install -D jellyfin.sh /app/bin/jellyfin.sh
+    sources:
+      - type: file
+        path: jellyfin.sh
